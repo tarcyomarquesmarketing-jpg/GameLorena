@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Aventura da Lorena — Jogo da Tabuada</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@600;700;800&display=swap');
+
+  :root{
+    --sol:#FFD23F;
+    --laranja:#FF7A3D;
+    --rosa:#FF5D8F;
+    --roxo:#7B4BFF;
+    --verde:#38D39F;
+    --azul:#3DA5FF;
+    --creme:#FFF7E6;
+    --escuro:#3A2C5C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Nunito',sans-serif;
+    background:
+      radial-gradient(circle at 12% 12%, #FFE38A 0%, transparent 38%),
+      radial-gradient(circle at 88% 18%, #FFB0C9 0%, transparent 38%),
+      radial-gradient(circle at 50% 95%, #B8E6FF 0%, transparent 45%),
+      var(--creme);
+    min-height:100vh;color:var(--escuro);padding:18px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .wrap{max-width:820px;margin:0 auto;}
+
+  h1{
+    font-family:'Baloo 2',cursive;font-size:clamp(1.9rem,6.5vw,3rem);
+    text-align:center;line-height:1;color:var(--roxo);
+    text-shadow:3px 3px 0 #fff,6px 6px 0 rgba(123,75,255,.25);margin-bottom:4px;
+  }
+  .sub{text-align:center;font-weight:800;color:var(--laranja);margin-bottom:18px;}
+
+  .card{
+    background:#fff;border:4px solid var(--escuro);border-radius:26px;
+    padding:20px;box-shadow:6px 6px 0 rgba(58,44,92,.15);margin-bottom:18px;
+  }
+
+  /* história de abertura */
+  .historia p{font-size:1.15rem;line-height:1.6;margin-bottom:12px;}
+  .historia .fala{
+    background:#FFF0D9;border-left:6px solid var(--laranja);
+    border-radius:0 14px 14px 0;padding:12px 14px;margin-bottom:12px;font-weight:700;
+  }
+  .personagens{display:flex;justify-content:center;gap:30px;margin:16px 0;text-align:center;}
+  .personagem{font-size:3.4rem;}
+  .personagem small{display:block;font-family:'Baloo 2';font-size:1rem;color:var(--roxo);}
+
+  .btn-grande{
+    display:block;width:100%;border:none;border-radius:20px;cursor:pointer;
+    font-family:'Baloo 2';font-size:1.4rem;font-weight:800;color:#fff;
+    padding:16px;background:var(--verde);box-shadow:0 6px 0 rgba(0,0,0,.18);
+    transition:transform .1s;
+  }
+  .btn-grande:active{transform:translateY(4px);}
+
+  .escolha-tab{margin-bottom:14px;}
+  .escolha-tab p{font-family:'Baloo 2';font-size:1.1rem;text-align:center;margin-bottom:10px;}
+  .nums{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+  .num-btn{
+    aspect-ratio:1;border:none;border-radius:14px;cursor:pointer;
+    font-family:'Baloo 2';font-size:1.4rem;font-weight:800;color:#fff;
+    box-shadow:0 4px 0 rgba(0,0,0,.18);transition:transform .1s;
+  }
+  .num-btn:active{transform:translateY(3px);}
+  .num-btn.ativo{outline:4px solid var(--sol);outline-offset:2px;}
+  .num-btn:nth-child(5n+1){background:var(--rosa);}
+  .num-btn:nth-child(5n+2){background:var(--laranja);}
+  .num-btn:nth-child(5n+3){background:var(--verde);}
+  .num-btn:nth-child(5n+4){background:var(--azul);}
+  .num-btn:nth-child(5n+5){background:var(--roxo);}
+
+  /* TABULEIRO */
+  .placar{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+  .chip{
+    background:#fff;border:3px solid var(--escuro);border-radius:16px;
+    padding:6px 14px;font-family:'Baloo 2';font-weight:700;
+    box-shadow:3px 3px 0 rgba(58,44,92,.2);
+  }
+  .chip span{color:var(--rosa);}
+
+  .tabuleiro{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:6px;
+  }
+  .casa{
+    aspect-ratio:1;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-family:'Baloo 2';font-size:1.2rem;font-weight:800;position:relative;
+    border:3px solid rgba(58,44,92,.25);background:#fff;color:var(--escuro);
+  }
+  .casa.evento{background:var(--sol);}
+  .casa.chegada{background:var(--rosa);color:#fff;font-size:1rem;text-align:center;}
+  .casa.feita{opacity:.45;}
+  .peao{position:absolute;font-size:1.9rem;animation:hop .4s ease;}
+  @keyframes hop{0%{transform:translateY(0);}50%{transform:translateY(-14px);}100%{transform:translateY(0);}}
+
+  .trilha-info{text-align:center;font-weight:800;color:var(--roxo);margin-bottom:14px;}
+
+  /* PERGUNTA */
+  .conta{
+    font-family:'Baloo 2';font-size:clamp(2.4rem,9vw,3.6rem);font-weight:800;
+    color:var(--roxo);text-align:center;margin-bottom:6px;
+  }
+  .conta .x{color:var(--laranja);}
+  .cena{text-align:center;font-weight:700;font-size:1.05rem;margin-bottom:12px;color:var(--escuro);min-height:1.4rem;}
+  .ilustra{
+    display:flex;justify-content:center;margin-bottom:14px;
+  }
+  .ilustra svg{
+    width:100%;max-width:260px;height:auto;
+    background:linear-gradient(#EAF6FF,#FFF7E6);
+    border:3px solid var(--escuro);border-radius:18px;
+    box-shadow:4px 4px 0 rgba(58,44,92,.15);animation:pop .4s ease;
+  }
+  .visual{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:16px;min-height:40px;}
+  .grupo{
+    background:#FFF0D9;border:3px dashed var(--laranja);border-radius:14px;
+    padding:6px;display:flex;flex-wrap:wrap;gap:3px;max-width:110px;justify-content:center;
+  }
+  .bolinha{font-size:1.3rem;line-height:1;animation:pop .3s ease;}
+  @keyframes pop{from{transform:scale(0);}to{transform:scale(1);}}
+
+  .opcoes{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-width:400px;margin:0 auto;}
+  .op{
+    border:none;border-radius:18px;padding:16px;cursor:pointer;
+    font-family:'Baloo 2';font-size:1.8rem;font-weight:800;color:#fff;
+    background:var(--azul);box-shadow:0 5px 0 rgba(0,0,0,.18);transition:transform .1s;
+  }
+  .op:active{transform:translateY(3px);}
+  .op.certo{background:var(--verde)!important;animation:tada .5s;}
+  .op.errado{background:#C9C2D6!important;}
+  @keyframes tada{0%{transform:scale(1);}30%{transform:scale(1.12) rotate(-3deg);}60%{transform:scale(1.08) rotate(3deg);}100%{transform:scale(1);}}
+  .feedback{font-family:'Baloo 2';font-size:1.3rem;text-align:center;margin-top:14px;min-height:1.6rem;font-weight:700;}
+
+  /* VITÓRIA */
+  .vitoria{text-align:center;}
+  .vitoria .troféu{font-size:5rem;animation:hop .6s ease infinite;}
+  .vitoria h2{font-family:'Baloo 2';font-size:2rem;color:var(--rosa);margin:10px 0;}
+  .vitoria p{font-size:1.15rem;line-height:1.6;margin-bottom:14px;}
+
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>A Aventura da Lorena</h1>
+  <p class="sub">O Jardim das Estrelas Perdidas 🌟</p>
+
+  <!-- TELA 1: HISTÓRIA -->
+  <div id="tela-historia" class="card historia">
+    <div class="personagens">
+      <div class="personagem">👧<small>Lorena</small></div>
+      <div class="personagem">👩<small>Érica (mamãe)</small></div>
+    </div>
+    <p>Era uma noite mágica quando a <b>Lorena</b> olhou pela janela e viu que faltavam estrelas no céu! Elas caíram dentro do <b>Jardim Encantado</b> e ficaram presas atrás de portões numerados.</p>
+    <div class="fala">🗣️ <b>Érica:</b> "Filha, cada portão só abre com uma multiplicação certinha. Vamos juntas devolver as estrelas para o céu?"</div>
+    <div class="fala">🗣️ <b>Lorena:</b> "Vamos, mamãe! Eu adoro desafios!"</div>
+    <p>Ajude a Lorena a atravessar as <b>10 casas</b> do jardim. A cada portão, uma conta de vezes. Acerte e a estrela volta a brilhar! ✨</p>
+
+    <div class="escolha-tab">
+      <p>Qual tabuada a Lorena vai treinar hoje?</p>
+      <div class="nums" id="nums"></div>
+    </div>
+    <button class="btn-grande" onclick="comecar()">Começar a aventura! 🚀</button>
+  </div>
+
+  <!-- TELA 2: JOGO -->
+  <div id="tela-jogo" class="hidden">
+    <div class="placar">
+      <div class="chip">⭐ Estrelas: <span id="estrelas">0</span>/10</div>
+      <div class="chip">📖 Tabuada do <span id="tabInfo">2</span></div>
+    </div>
+
+    <div class="card">
+      <div class="tabuleiro" id="tabuleiro"></div>
+      <p class="trilha-info" id="trilhaInfo">Lorena está na entrada do jardim!</p>
+    </div>
+
+    <div class="card">
+      <div class="cena" id="cena"></div>
+      <div class="ilustra" id="ilustra"></div>
+      <div class="conta" id="conta"></div>
+      <div class="visual" id="visual"></div>
+      <div class="opcoes" id="opcoes"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  </div>
+
+  <!-- TELA 3: VITÓRIA -->
+  <div id="tela-vitoria" class="hidden card vitoria">
+    <div class="troféu">🏆</div>
+    <h2>Você conseguiu!</h2>
+    <p>A <b>Lorena</b> devolveu todas as estrelas para o céu! A <b>mamãe Érica</b> deu um abraço bem apertado e disse que ela é a maior craque da tabuada do jardim! 🌟💜</p>
+    <p id="resumo"></p>
+    <button class="btn-grande" onclick="location.reload()">Jogar de novo 🔄</button>
+  </div>
+</div>
+
+<script>
+  const bichinhos=['🍎','🐶','⭐','🐟','🌸','🐝','🍩','🐢','🎈','🦋'];
+  const cenas=[
+    'Lorena chegou ao portão das flores 🌷',
+    'Um sapinho pede ajuda na pedra 🐸',
+    'A fada da tabuada apareceu! 🧚',
+    'Ponte de cogumelos pela frente 🍄',
+    'O riacho brilhante precisa de uma ponte 💧',
+    'Lorena encontra um baú trancado 🎁',
+    'A coruja sábia faz uma pergunta 🦉',
+    'Quase lá — a torre das estrelas! 🗼',
+    'O último portão dourado ✨',
+    'A estrela mais brilhante espera no topo 🌟'
+  ];
+  // ilustrações SVG, uma por casa (combinam com o texto de 'cenas')
+  const ilustracoes=[
+    // 0 - portão das flores
+    `<svg viewBox="0 0 200 150"><rect x="60" y="40" width="80" height="90" rx="6" fill="#C9A26A" stroke="#7B4BFF" stroke-width="3"/><line x1="100" y1="40" x2="100" y2="130" stroke="#7B4BFF" stroke-width="3"/><circle cx="55" cy="120" r="10" fill="#FF5D8F"/><circle cx="145" cy="120" r="10" fill="#FFD23F"/><g fill="#FF7A3D"><circle cx="50" cy="60" r="7"/><circle cx="150" cy="60" r="7"/></g><circle cx="50" cy="60" r="3" fill="#FFD23F"/><circle cx="150" cy="60" r="3" fill="#FFD23F"/><rect x="40" y="130" width="120" height="8" fill="#38D39F"/></svg>`,
+    // 1 - sapinho na pedra
+    `<svg viewBox="0 0 200 150"><ellipse cx="100" cy="120" rx="70" ry="20" fill="#9AA0A6"/><ellipse cx="100" cy="95" rx="34" ry="30" fill="#38D39F"/><circle cx="86" cy="72" r="12" fill="#38D39F"/><circle cx="114" cy="72" r="12" fill="#38D39F"/><circle cx="86" cy="70" r="6" fill="#fff"/><circle cx="114" cy="70" r="6" fill="#fff"/><circle cx="86" cy="71" r="3" fill="#3A2C5C"/><circle cx="114" cy="71" r="3" fill="#3A2C5C"/><path d="M82 100 Q100 112 118 100" stroke="#2A9D6E" stroke-width="3" fill="none"/></svg>`,
+    // 2 - fada
+    `<svg viewBox="0 0 200 150"><circle cx="100" cy="60" r="16" fill="#FFE0B2"/><path d="M100 74 L86 115 L114 115 Z" fill="#FF5D8F"/><path d="M84 78 Q55 60 60 95 Q80 92 88 88" fill="#B8E6FF" opacity=".8"/><path d="M116 78 Q145 60 140 95 Q120 92 112 88" fill="#B8E6FF" opacity=".8"/><line x1="118" y1="70" x2="140" y2="48" stroke="#FFD23F" stroke-width="3"/><path d="M140 40 l3 6 6 1 -4 5 1 6 -6 -3 -6 3 1 -6 -4 -5 6 -1z" fill="#FFD23F"/><circle cx="94" cy="58" r="2" fill="#3A2C5C"/><circle cx="106" cy="58" r="2" fill="#3A2C5C"/></svg>`,
+    // 3 - cogumelos (ponte)
+    `<svg viewBox="0 0 200 150"><g><rect x="45" y="90" width="14" height="40" rx="6" fill="#FFE0B2"/><ellipse cx="52" cy="90" rx="26" ry="18" fill="#FF5D8F"/><circle cx="44" cy="86" r="4" fill="#fff"/><circle cx="60" cy="90" r="4" fill="#fff"/></g><g><rect x="135" y="80" width="16" height="50" rx="6" fill="#FFE0B2"/><ellipse cx="143" cy="80" rx="30" ry="20" fill="#FF7A3D"/><circle cx="135" cy="76" r="4" fill="#fff"/><circle cx="152" cy="80" r="4" fill="#fff"/></g><rect x="30" y="128" width="140" height="8" fill="#38D39F"/></svg>`,
+    // 4 - riacho
+    `<svg viewBox="0 0 200 150"><rect x="0" y="70" width="200" height="60" fill="#3DA5FF" opacity=".7"/><path d="M0 80 Q25 70 50 80 T100 80 T150 80 T200 80" stroke="#fff" stroke-width="3" fill="none" opacity=".7"/><path d="M0 100 Q25 90 50 100 T100 100 T150 100 T200 100" stroke="#fff" stroke-width="3" fill="none" opacity=".5"/><rect x="70" y="60" width="60" height="10" fill="#C9A26A"/><circle cx="40" cy="55" r="6" fill="#FFD23F"/><circle cx="160" cy="50" r="5" fill="#FFD23F"/></svg>`,
+    // 5 - baú
+    `<svg viewBox="0 0 200 150"><rect x="60" y="75" width="80" height="50" rx="6" fill="#C9A26A" stroke="#7B4BFF" stroke-width="3"/><path d="M60 75 Q100 45 140 75 Z" fill="#B07A3C" stroke="#7B4BFF" stroke-width="3"/><rect x="92" y="88" width="16" height="20" rx="3" fill="#FFD23F"/><circle cx="100" cy="94" r="3" fill="#3A2C5C"/><path d="M120 55 l2 5 5 1 -4 4 1 5 -4 -3 -5 3 1 -5 -4 -4 5 -1z" fill="#FFD23F"/></svg>`,
+    // 6 - coruja
+    `<svg viewBox="0 0 200 150"><ellipse cx="100" cy="90" rx="40" ry="45" fill="#B07A3C"/><circle cx="84" cy="72" r="16" fill="#fff"/><circle cx="116" cy="72" r="16" fill="#fff"/><circle cx="84" cy="72" r="7" fill="#3A2C5C"/><circle cx="116" cy="72" r="7" fill="#3A2C5C"/><path d="M100 80 l-8 10 h16 z" fill="#FF7A3D"/><path d="M70 50 l14 14 M130 50 l-14 14" stroke="#B07A3C" stroke-width="6" stroke-linecap="round"/><path d="M72 118 q28 20 56 0" stroke="#8A5E2E" stroke-width="3" fill="none"/></svg>`,
+    // 7 - torre
+    `<svg viewBox="0 0 200 150"><rect x="80" y="50" width="40" height="80" fill="#C9A26A" stroke="#7B4BFF" stroke-width="3"/><path d="M75 50 L100 25 L125 50 Z" fill="#FF5D8F"/><rect x="92" y="90" width="16" height="40" fill="#7B4BFF"/><rect x="90" y="65" width="20" height="16" rx="4" fill="#B8E6FF"/><path d="M100 25 l1 -12" stroke="#3A2C5C" stroke-width="2"/><path d="M100 8 l8 5 -8 5z" fill="#FFD23F"/></svg>`,
+    // 8 - portão dourado
+    `<svg viewBox="0 0 200 150"><rect x="55" y="35" width="90" height="95" rx="8" fill="#FFD23F" stroke="#B07A3C" stroke-width="3"/><line x1="100" y1="35" x2="100" y2="130" stroke="#B07A3C" stroke-width="3"/><line x1="77" y1="35" x2="77" y2="130" stroke="#E8B800" stroke-width="2"/><line x1="123" y1="35" x2="123" y2="130" stroke="#E8B800" stroke-width="2"/><circle cx="90" cy="82" r="5" fill="#B07A3C"/><circle cx="110" cy="82" r="5" fill="#B07A3C"/><path d="M40 30 l2 5 5 1 -4 4 1 5 -4 -3 -5 3 1 -5 -4 -4 5 -1z" fill="#FF7A3D"/></svg>`,
+    // 9 - estrela no topo
+    `<svg viewBox="0 0 200 150"><rect x="0" y="0" width="200" height="150" fill="#2E2A5C" opacity=".15"/><path d="M100 30 l14 30 33 4 -24 23 6 33 -29 -16 -29 16 6 -33 -24 -23 33 -4z" fill="#FFD23F" stroke="#FF7A3D" stroke-width="3"/><circle cx="50" cy="40" r="2" fill="#FFD23F"/><circle cx="150" cy="45" r="2" fill="#FFD23F"/><circle cx="40" cy="100" r="2" fill="#FFD23F"/><circle cx="160" cy="110" r="2" fill="#FFD23F"/></svg>`
+  ];
+  let tabuada=2, casaAtual=0, estrelas=0, respostaCerta=0;
+
+  const nums=document.getElementById('nums');
+  for(let i=1;i<=10;i++){
+    const b=document.createElement('button');
+    b.className='num-btn'+(i===2?' ativo':'');b.textContent=i;
+    b.onclick=()=>{tabuada=i;[...nums.children].forEach((x,idx)=>x.classList.toggle('ativo',idx+1===i));};
+    nums.appendChild(b);
+  }
+
+  function embaralhar(a){return a.sort(()=>Math.random()-0.5);}
+
+  function comecar(){
+    document.getElementById('tela-historia').classList.add('hidden');
+    document.getElementById('tela-jogo').classList.remove('hidden');
+    document.getElementById('tabInfo').textContent=tabuada;
+    montarTabuleiro();
+    novaPergunta();
+  }
+
+  function montarTabuleiro(){
+    const t=document.getElementById('tabuleiro');
+    t.innerHTML='';
+    for(let i=0;i<10;i++){
+      const c=document.createElement('div');
+      c.className='casa'+(i===9?' chegada':(i%3===0&&i>0?' evento':''));
+      c.id='casa'+i;
+      c.innerHTML = i===9 ? '🌟<br>topo' : (i+1);
+      t.appendChild(c);
+    }
+    posicionarPeao();
+  }
+
+  function posicionarPeao(){
+    document.querySelectorAll('.peao').forEach(p=>p.remove());
+    const casa=document.getElementById('casa'+casaAtual);
+    const p=document.createElement('div');p.className='peao';p.textContent='👧';
+    casa.appendChild(p);
+    for(let i=0;i<casaAtual;i++)document.getElementById('casa'+i).classList.add('feita');
+  }
+
+  function novaPergunta(){
+    document.getElementById('cena').textContent=cenas[casaAtual];
+    document.getElementById('ilustra').innerHTML=ilustracoes[casaAtual];
+    const b=Math.floor(Math.random()*10)+1;
+    respostaCerta=tabuada*b;
+    document.getElementById('conta').innerHTML=`${tabuada} <span class="x">×</span> ${b}`;
+
+    const emoji=bichinhos[(tabuada-1)%bichinhos.length];
+    const visual=document.getElementById('visual');visual.innerHTML='';
+    for(let g=0;g<b;g++){
+      const grupo=document.createElement('div');grupo.className='grupo';
+      for(let k=0;k<tabuada;k++){
+        const bo=document.createElement('span');bo.className='bolinha';bo.textContent=emoji;
+        bo.style.animationDelay=(g*0.05+k*0.02)+'s';grupo.appendChild(bo);
+      }
+      visual.appendChild(grupo);
+    }
+
+    const set=new Set([respostaCerta]);
+    while(set.size<4){
+      let e=respostaCerta+(Math.floor(Math.random()*7)-3)*tabuada;
+      if(e<0||e===respostaCerta)e=respostaCerta+Math.ceil(Math.random()*6);
+      set.add(e);
+    }
+    const arr=embaralhar([...set]);
+    const box=document.getElementById('opcoes');box.innerHTML='';
+    arr.forEach(v=>{
+      const btn=document.createElement('button');btn.className='op';btn.textContent=v;
+      btn.onclick=()=>responder(btn,v);box.appendChild(btn);
+    });
+    document.getElementById('feedback').textContent='';
+  }
+
+  function responder(btn,valor){
+    const fb=document.getElementById('feedback');
+    if(valor===respostaCerta){
+      btn.classList.add('certo');
+      [...document.getElementById('opcoes').children].forEach(b=>b.disabled=true);
+      estrelas++;document.getElementById('estrelas').textContent=estrelas;
+      const elogios=['Isso, Lorena! ⭐','Estrela salva! 🌟','A mamãe Érica ficou orgulhosa! 💜','Mandou muito bem! 🎉','Portão aberto! 🚪✨'];
+      fb.textContent=elogios[Math.floor(Math.random()*elogios.length)];
+      fb.style.color='var(--verde)';
+      document.getElementById('trilhaInfo').textContent='A estrela voltou a brilhar! ✨';
+      setTimeout(()=>{
+        casaAtual++;
+        if(casaAtual>=10){vencer();return;}
+        posicionarPeao();novaPergunta();
+      },1200);
+    }else{
+      btn.classList.add('errado');
+      fb.textContent='Ops! A Lorena tenta de novo 💪';
+      fb.style.color='var(--laranja)';
+    }
+  }
+
+  function vencer(){
+    document.getElementById('tela-jogo').classList.add('hidden');
+    document.getElementById('tela-vitoria').classList.remove('hidden');
+    document.getElementById('resumo').innerHTML=`Você salvou <b>${estrelas} estrelas</b> praticando a <b>tabuada do ${tabuada}</b>! 🌟`;
+  }
+</script>
+</body>
+</html>
